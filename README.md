@@ -2,6 +2,7 @@
 
 [![Build Status](https://github.com/nks-hub/nette-markdown/actions/workflows/ci.yml/badge.svg)](https://github.com/nks-hub/nette-markdown/actions)
 [![Packagist Version](https://img.shields.io/packagist/v/nks-hub/nette-markdown.svg)](https://packagist.org/packages/nks-hub/nette-markdown)
+[![Packagist Downloads](https://img.shields.io/packagist/dt/nks-hub/nette-markdown.svg)](https://packagist.org/packages/nks-hub/nette-markdown)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![PHP](https://img.shields.io/badge/PHP-8.2+-8892be.svg)](https://php.net/)
 [![Tests](https://img.shields.io/badge/tests-10%20passed-brightgreen.svg)](https://github.com/nks-hub/nette-markdown/actions)
