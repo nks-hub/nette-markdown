@@ -15,6 +15,7 @@ use League\CommonMark\Extension\Table\TableExtension;
 use League\CommonMark\Extension\TableOfContents\TableOfContentsExtension;
 use League\CommonMark\Extension\TaskList\TaskListExtension;
 use League\CommonMark\MarkdownConverter as LeagueMarkdownConverter;
+use NksHub\Markdown\Extension\Mark\MarkExtension;
 
 class MarkdownConverter
 {
@@ -94,6 +95,7 @@ class MarkdownConverter
             'smartpunct' => [new SmartPunctExtension()],
             'heading_permalink' => [new HeadingPermalinkExtension()],
             'toc' => [new TableOfContentsExtension()],
+            'mark' => [new MarkExtension()],
             default => [],
         };
     }
