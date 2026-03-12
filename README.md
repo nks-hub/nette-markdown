@@ -218,7 +218,7 @@ For user-generated content, use `convertSafe()` which enforces both settings reg
 
 ---
 
-## Testing
+## Development
 
 ```bash
 # Install dependencies
@@ -229,6 +229,9 @@ vendor/bin/phpunit
 
 # Run with coverage
 vendor/bin/phpunit --coverage-html coverage/
+
+# Static analysis
+vendor/bin/phpstan analyse
 ```
 
 ---
@@ -254,9 +257,10 @@ Contributions are welcome! For major changes, please open an issue first.
 
 ## Support
 
-- Bug reports: [GitHub Issues](https://github.com/nks-hub/nette-markdown/issues)
-- CommonMark docs: [commonmark.thephpleague.com](https://commonmark.thephpleague.com/)
-- Nette Framework: [nette.org](https://nette.org)
+- 📧 **Email:** dev@nks-hub.cz
+- 🐛 **Bug reports:** [GitHub Issues](https://github.com/nks-hub/nette-markdown/issues)
+- 📖 **CommonMark docs:** [commonmark.thephpleague.com](https://commonmark.thephpleague.com/)
+- 🏗️ **Nette Framework:** [nette.org](https://nette.org)
 
 ## License
 
@@ -264,6 +268,14 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
+## Links
+
+- [league/commonmark](https://commonmark.thephpleague.com/) — The underlying CommonMark parser
+- [Packagist Package](https://packagist.org/packages/nks-hub/nette-markdown)
+- [@nks-hub/texy-editor](https://github.com/nks-hub/texy-ts-editor) — TypeScript Texy/Markdown editor with toolbar
+
+---
+
 <p align="center">
-  Made with care by <a href="https://github.com/nks-hub">NKS Hub</a>
+  Made with ❤️ by <a href="https://github.com/nks-hub">NKS Hub</a>
 </p>
