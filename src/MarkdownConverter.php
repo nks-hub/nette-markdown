@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace NksHub\Markdown;
 
+use InvalidArgumentException;
 use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\Autolink\AutolinkExtension;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
+use League\CommonMark\Extension\ExternalLink\ExternalLinkExtension;
 use League\CommonMark\Extension\Footnote\FootnoteExtension;
 use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
 use League\CommonMark\Extension\SmartPunct\SmartPunctExtension;
@@ -19,6 +21,17 @@ use NksHub\Markdown\Extension\Mark\MarkExtension;
 
 class MarkdownConverter
 {
+    private const KNOWN_EXTENSIONS = [
+        'commonmark',
+        'gfm',
+        'footnote',
+        'smartpunct',
+        'heading_permalink',
+        'toc',
+        'mark',
+        'external_link',
+    ];
+
     private LeagueMarkdownConverter $converter;
 
     /** @param array<string, mixed> $config */
@@ -80,6 +93,8 @@ class MarkdownConverter
      * available in league/commonmark 2.x (there is no single GFM class).
      *
      * @return list<\League\CommonMark\Extension\ExtensionInterface>
+     *
+     * @throws InvalidArgumentException When an unknown extension name is provided.
      */
     private function resolveExtension(string $name): array
     {
@@ -96,7 +111,12 @@ class MarkdownConverter
             'heading_permalink' => [new HeadingPermalinkExtension()],
             'toc' => [new TableOfContentsExtension()],
             'mark' => [new MarkExtension()],
-            default => [],
+            'external_link' => [new ExternalLinkExtension()],
+            default => throw new InvalidArgumentException(sprintf(
+                'Unknown markdown extension "%s". Known extensions: %s',
+                $name,
+                implode(', ', self::KNOWN_EXTENSIONS),
+            )),
         };
     }
 }

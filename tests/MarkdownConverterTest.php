@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace NksHub\Markdown\Tests;
 
+use InvalidArgumentException;
 use NksHub\Markdown\MarkdownConverter;
 use PHPUnit\Framework\TestCase;
 
@@ -108,5 +109,87 @@ class MarkdownConverterTest extends TestCase
 
         $this->assertStringContainsString('id="', $html);
         $this->assertStringContainsString('<h2', $html);
+    }
+
+    public function testUnknownExtensionThrowsException(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unknown markdown extension "nonexistent"');
+
+        new MarkdownConverter([
+            'extensions' => ['commonmark', 'nonexistent'],
+        ]);
+    }
+
+    public function testConvertSafeStripsHtmlEvenWhenConfigAllows(): void
+    {
+        $converter = new MarkdownConverter([
+            'html_input' => 'allow',
+            'allow_unsafe_links' => true,
+        ]);
+
+        $html = $converter->convertSafe('<script>alert("xss")</script>');
+
+        $this->assertStringNotContainsString('<script>', $html);
+        $this->assertStringNotContainsString('alert(', $html);
+    }
+
+    public function testConvertSafeBlocksUnsafeLinks(): void
+    {
+        $converter = new MarkdownConverter([
+            'html_input' => 'allow',
+            'allow_unsafe_links' => true,
+        ]);
+
+        $html = $converter->convertSafe('[click](javascript:alert(1))');
+
+        $this->assertStringNotContainsString('javascript:', $html);
+    }
+
+    public function testConvertRawRespectsConfig(): void
+    {
+        $converter = new MarkdownConverter([
+            'html_input' => 'allow',
+        ]);
+
+        $html = $converter->convert('<div class="custom">content</div>');
+
+        $this->assertStringContainsString('<div class="custom">content</div>', $html);
+    }
+
+    public function testExternalLinkRelAttributes(): void
+    {
+        $converter = new MarkdownConverter([
+            'extensions' => ['commonmark', 'gfm', 'external_link'],
+            'external_link' => [
+                'internal_hosts' => ['mysite.com'],
+                'nofollow' => 'external',
+                'noopener' => 'external',
+                'noreferrer' => 'external',
+            ],
+        ]);
+
+        $html = $converter->convert('[external](https://example.com)');
+
+        $this->assertStringContainsString('nofollow', $html);
+        $this->assertStringContainsString('noopener', $html);
+        $this->assertStringContainsString('noreferrer', $html);
+    }
+
+    public function testExternalLinkInternalHostSkipsRel(): void
+    {
+        $converter = new MarkdownConverter([
+            'extensions' => ['commonmark', 'gfm', 'external_link'],
+            'external_link' => [
+                'internal_hosts' => ['mysite.com'],
+                'nofollow' => 'external',
+                'noopener' => 'external',
+                'noreferrer' => 'external',
+            ],
+        ]);
+
+        $html = $converter->convert('[internal](https://mysite.com/page)');
+
+        $this->assertStringNotContainsString('nofollow', $html);
     }
 }
