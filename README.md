@@ -7,22 +7,20 @@
 [![Nette Version](https://img.shields.io/badge/nette%2Fdi-%5E3.1-blue.svg)](https://nette.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-> Nette Framework DI extension wrapping [league/commonmark](https://commonmark.thephpleague.com/) with GitHub Flavored Markdown support, Latte filter integration, and configurable extension system.
-
-Nette Framework lacks a first-class Markdown integration. While `league/commonmark` is an excellent CommonMark parser, wiring it into Nette's DI container, configuring extensions, and registering Latte filters requires boilerplate code in every project. This package provides a **zero-config drop-in** that just works.
+> Nette DI extension that registers a [league/commonmark](https://commonmark.thephpleague.com/) converter as a service and adds `|markdown` filters to every Latte engine.
 
 ## Features
 
-- 🧩 **Nette DI Extension** - Register in `config.neon`, get `MarkdownConverter` autowired everywhere
-- 🎨 **Latte Filter** - Use `{$content|markdown}` in any template, automatically registered on all Latte engines
-- 📝 **CommonMark** - Full CommonMark spec compliance via league/commonmark 2.x
-- 🐙 **GFM by Default** - Tables with alignment, task lists (`- [x] Done`), strikethrough (`~~deleted~~`), autolinks out of the box
-- 🔗 **Heading Permalinks & TOC** - Anchor links on headings and auto-generated table of contents (opt-in)
-- 📚 **Footnotes & Smart Punctuation** - `[^1]` reference-style footnotes, curly quotes, em-dashes, ellipsis (opt-in)
+- 🧩 **Nette DI extension** - One line in `config.neon` makes `MarkdownConverter` autowirable
+- 🎨 **Latte filter** - `{$content|markdown}` works in any template; the filter is registered on all Latte engines
+- 📝 **CommonMark** - Parsing done by league/commonmark 2.x
+- 🐙 **GFM by default** - Tables with alignment, task lists (`- [x] Done`), strikethrough (`~~deleted~~`) and autolinks enabled without configuration
+- 🔗 **Heading permalinks and TOC** - Anchor links on headings and a generated table of contents (opt-in)
+- 📚 **Footnotes and smart punctuation** - `[^1]` reference-style footnotes, curly quotes, dashes, ellipsis (opt-in)
 - 🖍️ **Highlight** - `==text==` rendered as `<mark>` (opt-in)
-- 💻 **Fenced Code Blocks** - ` ```lang ` syntax with language class output
-- 🛡️ **Safe by Default** - HTML input stripped, unsafe links (`javascript:`) blocked
-- ⚙️ **Configurable** - Enable/disable extensions, set security policies, add heading permalinks
+- 💻 **Fenced code blocks** - ` ```lang ` blocks get a `language-*` class
+- 🛡️ **Safe defaults** - Raw HTML input stripped, unsafe links (`javascript:`) blocked
+- ⚙️ **Configuration** - Pick extensions, set `html_input` and `allow_unsafe_links`, change the permalink symbol
 
 ## Requirements
 
@@ -45,11 +43,11 @@ extensions:
     markdown: NksHub\Markdown\DI\MarkdownExtension
 ```
 
-That's it. `MarkdownConverter` is now available for injection, and the `|markdown` Latte filter is registered automatically.
+`MarkdownConverter` is then available for injection and the `|markdown` Latte filter is registered.
 
 ## Usage
 
-### In Presenters / Services (Dependency Injection)
+### In presenters and services
 
 ```php
 use NksHub\Markdown\MarkdownConverter;
@@ -68,7 +66,7 @@ class WikiPresenter extends Nette\Application\UI\Presenter
 }
 ```
 
-### In Latte Templates
+### In Latte templates
 
 ```latte
 {* Filter syntax *}
@@ -79,7 +77,7 @@ class WikiPresenter extends Nette\Application\UI\Presenter
 {$html|noescape}
 ```
 
-### Standalone (Without Nette DI)
+### Standalone, without Nette DI
 
 ```php
 use NksHub\Markdown\MarkdownConverter;
@@ -94,7 +92,7 @@ $safeHtml = $converter->convertSafe($userInput);
 
 ## Configuration
 
-### Default (Zero Config)
+### Defaults
 
 ```neon
 extensions:
@@ -103,7 +101,7 @@ extensions:
 
 Defaults: CommonMark + GFM (tables, task lists, strikethrough, autolinks), HTML stripped, unsafe links blocked.
 
-### Full Configuration
+### Full configuration
 
 ```neon
 extensions:
@@ -130,11 +128,11 @@ markdown:
         symbol: '#'
 ```
 
-### Available Extensions
+### Available extensions
 
 | Key | Extension | Description |
 |-----|-----------|-------------|
-| `commonmark` | `CommonMarkCoreExtension` | Core CommonMark spec — always include this |
+| `commonmark` | `CommonMarkCoreExtension` | Core CommonMark spec, always include this |
 | `gfm` | Tables + Strikethrough + TaskList + Autolink | GitHub Flavored Markdown bundle |
 | `footnote` | `FootnoteExtension` | `[^1]` reference-style footnotes |
 | `smartpunct` | `SmartPunctExtension` | Smart quotes, dashes, ellipsis |
@@ -143,7 +141,7 @@ markdown:
 | `mark` | `MarkExtension` | `==text==` rendered as `<mark>text</mark>` |
 | `external_link` | `ExternalLinkExtension` | Attributes for external links |
 
-## API Reference
+## API reference
 
 ### `MarkdownConverter`
 
@@ -169,7 +167,7 @@ $safeHtml = $converter->convertSafe($untrustedInput);
 
 ### `MarkdownFilter` (Latte)
 
-Automatically registered when using the DI extension. Callable as a Latte filter:
+Registered by the DI extension:
 
 ```latte
 {$content|markdown|noescape}
@@ -180,16 +178,16 @@ Returns `Latte\Runtime\Html` instance, so `|noescape` is required to render the 
 ### `MarkdownExtension` (Nette DI)
 
 Filters registered on every Latte engine:
-- `|markdown` and `|markdownSafe` — always use safe conversion (`convertSafe()`)
-- `|markdownRaw` — uses the converter as configured (respects `html_input`)
+- `|markdown` and `|markdownSafe`: always use safe conversion (`convertSafe()`)
+- `|markdownRaw`: uses the converter as configured (respects `html_input`)
 
 Registers two services:
-- `NksHub\Markdown\MarkdownConverter` — injectable converter
-- `NksHub\Markdown\Latte\MarkdownFilter` — auto-registered on all Latte engines
+- `NksHub\Markdown\MarkdownConverter`: injectable converter
+- `NksHub\Markdown\Latte\MarkdownFilter`: registered on all Latte engines
 
 ## Security
 
-The converter is **safe by default**:
+Defaults:
 
 | Setting | Default | Effect |
 |---------|---------|--------|
@@ -198,13 +196,13 @@ The converter is **safe by default**:
 
 For user-generated content, use `convertSafe()` which enforces both settings regardless of constructor config.
 
-**Never** use `html_input: allow` with untrusted input — it allows raw HTML injection including `<script>` tags.
+Do not use `html_input: allow` with untrusted input: it passes raw HTML through, `<script>` tags included.
 
 ## Links
 
-- [league/commonmark](https://commonmark.thephpleague.com/) — The underlying CommonMark parser
-- [Packagist Package](https://packagist.org/packages/nks-hub/nette-markdown)
-- [@nks-hub/texy-editor](https://github.com/nks-hub/texy-ts-editor) — TypeScript Texy/Markdown editor with toolbar
+- [league/commonmark](https://commonmark.thephpleague.com/): the CommonMark parser used here
+- [Packagist package](https://packagist.org/packages/nks-hub/nette-markdown)
+- [@nks-hub/texy-editor](https://github.com/nks-hub/texy-ts-editor): TypeScript Texy/Markdown editor with a toolbar
 
 ## Development
 
