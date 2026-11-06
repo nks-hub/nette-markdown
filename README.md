@@ -70,11 +70,11 @@ class WikiPresenter extends Nette\Application\UI\Presenter
 
 ```latte
 {* Filter syntax *}
-{$page->getContent()|markdown|noescape}
+{$page->getContent()|markdown}
 
 {* Or in a block *}
 {var $html = ($page->getContent()|markdown)}
-{$html|noescape}
+{$html}
 ```
 
 ### Standalone, without Nette DI
@@ -86,7 +86,7 @@ $converter = new MarkdownConverter();
 $html = $converter->convert('# Hello **World**');
 // <h1>Hello <strong>World</strong></h1>
 
-// Safe mode — strips all HTML, blocks unsafe links
+// Safe mode: same extensions, but strips all HTML and blocks unsafe links
 $safeHtml = $converter->convertSafe($userInput);
 ```
 
@@ -116,6 +116,8 @@ markdown:
         - smartpunct       # Curly quotes, em-dashes, ellipsis
         - heading_permalink # Anchor links on headings
         - toc              # Auto-generated Table of Contents
+        - mark             # ==highlight== as <mark>
+        - external_link    # rel/target attributes on external links
 
     # HTML input handling: strip (default), allow, escape
     html_input: strip
@@ -161,7 +163,7 @@ $converter = new MarkdownConverter([
 // Convert Markdown to HTML
 $html = $converter->convert($markdown);
 
-// Safe conversion (always strips HTML + blocks unsafe links, regardless of config)
+// Safe conversion (configured extensions; always strips HTML + blocks unsafe links, regardless of config)
 $safeHtml = $converter->convertSafe($untrustedInput);
 ```
 
@@ -170,16 +172,16 @@ $safeHtml = $converter->convertSafe($untrustedInput);
 Registered by the DI extension:
 
 ```latte
-{$content|markdown|noescape}
+{$content|markdown}
 ```
 
-Returns `Latte\Runtime\Html` instance, so `|noescape` is required to render the HTML.
+Returns a `Latte\Runtime\Html` instance, which Latte does not escape again, so `|noescape` is not needed. The filter output is always the safe conversion (see below).
 
 ### `MarkdownExtension` (Nette DI)
 
 Filters registered on every Latte engine:
-- `|markdown` and `|markdownSafe`: always use safe conversion (`convertSafe()`)
-- `|markdownRaw`: uses the converter as configured (respects `html_input`)
+- `|markdown` and `|markdownSafe`: safe conversion (`convertSafe()`). They use the extensions from your configuration (for example `mark`, `footnote`, `toc`), but always strip raw HTML and block unsafe links
+- `|markdownRaw`: uses the converter as configured (respects `html_input` and `allow_unsafe_links`)
 
 Registers two services:
 - `NksHub\Markdown\MarkdownConverter`: injectable converter
@@ -194,7 +196,7 @@ Defaults:
 | `html_input` | `strip` | Removes all raw HTML from Markdown input |
 | `allow_unsafe_links` | `false` | Blocks `javascript:`, `vbscript:`, `data:` URLs |
 
-For user-generated content, use `convertSafe()` which enforces both settings regardless of constructor config.
+For user-generated content, use `convertSafe()` (or the `|markdown` filter), which enforces both settings regardless of constructor config and keeps the configured extensions.
 
 Do not use `html_input: allow` with untrusted input: it passes raw HTML through, `<script>` tags included.
 
@@ -215,9 +217,6 @@ vendor/bin/phpunit
 
 # Run with coverage
 vendor/bin/phpunit --coverage-html coverage/
-
-# Static analysis
-vendor/bin/phpstan analyse
 ```
 
 ## Contributing

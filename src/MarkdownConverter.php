@@ -33,9 +33,10 @@ class MarkdownConverter
     ];
 
     private LeagueMarkdownConverter $converter;
+    private ?LeagueMarkdownConverter $safeConverter = null;
 
     /** @param array<string, mixed> $config */
-    public function __construct(array $config = [])
+    public function __construct(private readonly array $config = [])
     {
         $this->converter = $this->buildConverter($config);
     }
@@ -45,23 +46,19 @@ class MarkdownConverter
         return (string) $this->converter->convert($markdown);
     }
 
+    /**
+     * Convert untrusted input: uses the configured extensions but always strips raw HTML
+     * and blocks unsafe links, whatever 'html_input' and 'allow_unsafe_links' say.
+     */
     public function convertSafe(string $markdown): string
     {
-        $safeConfig = [
+        $this->safeConverter ??= $this->buildConverter([
+            ...$this->config,
             'html_input' => 'strip',
             'allow_unsafe_links' => false,
-        ];
+        ]);
 
-        $env = new Environment($safeConfig);
-        $env->addExtension(new CommonMarkCoreExtension());
-        $env->addExtension(new TableExtension());
-        $env->addExtension(new StrikethroughExtension());
-        $env->addExtension(new TaskListExtension());
-        $env->addExtension(new AutolinkExtension());
-
-        $safeConverter = new LeagueMarkdownConverter($env);
-
-        return (string) $safeConverter->convert($markdown);
+        return (string) $this->safeConverter->convert($markdown);
     }
 
     /** @param array<string, mixed> $config */
